@@ -1,4 +1,10 @@
 {
+  "name": "nexus-report",
+  "version": "1.0.0",
+  "engines": {
+    "node": "20.x",
+    "npm": "10.x"
+  },
   "devDependencies": {
     "@types/prop-types": "^15.7.15"
   }
