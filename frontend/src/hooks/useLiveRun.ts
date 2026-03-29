@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
+// ❌ Removed localhost fallback
+// ✅ Only use env variable
+const WS_URL = import.meta.env.VITE_WS_URL;
 
 export interface LiveEvent {
   event: string;
@@ -25,7 +27,8 @@ export function useLiveRun(runId: string | null) {
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    if (!runId) return;
+    // ✅ Safety check
+    if (!runId || !WS_URL) return;
 
     const ws = new WebSocket(`${WS_URL}/ws/live/${runId}`);
     wsRef.current = ws;
@@ -59,15 +62,21 @@ export function useProjectFeed(projectId: string | null) {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    if (!projectId) return;
+    // ✅ Safety check
+    if (!projectId || !WS_URL) return;
 
     const ws = new WebSocket(`${WS_URL}/ws/project/${projectId}`);
+
     ws.onopen = () => setConnected(true);
     ws.onclose = () => setConnected(false);
+    ws.onerror = () => setConnected(false);
+
     ws.onmessage = (e) => {
       try {
         setLatestEvent(JSON.parse(e.data));
-      } catch {}
+      } catch {
+        // ignore malformed messages
+      }
     };
 
     return () => ws.close();
