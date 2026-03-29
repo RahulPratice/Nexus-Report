@@ -1,0 +1,24 @@
+{
+  "name": "@nexusreport/playwright-reporter",
+  "version": "0.1.0",
+  "description": "Official NexusReport reporter for Playwright",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "@playwright/test": ">=1.20.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.43.0",
+    "typescript": "^5.4.0"
+  },
+  "keywords": ["playwright", "reporter", "nexusreport", "testing", "qa"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/nexusreport"
+  }
+}

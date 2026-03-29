@@ -1,0 +1,100 @@
+# NexusReport Helm chart values
+# Deploy to Kubernetes: helm install nexusreport ./helm -f values.yaml
+
+replicaCount: 2
+
+image:
+  backend:
+    repository: ghcr.io/your-org/nexusreport/backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  frontend:
+    repository: ghcr.io/your-org/nexusreport/frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+
+service:
+  backend:
+    type: ClusterIP
+    port: 8000
+  frontend:
+    type: ClusterIP
+    port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: nexusreport.yourdomain.com
+      paths:
+        - path: /api
+          pathType: Prefix
+          service: backend
+        - path: /ws
+          pathType: Prefix
+          service: backend
+        - path: /
+          pathType: Prefix
+          service: frontend
+  tls:
+    - secretName: nexusreport-tls
+      hosts:
+        - nexusreport.yourdomain.com
+
+postgresql:
+  enabled: true
+  auth:
+    database: nexusreport
+    username: nexus
+    existingSecret: nexusreport-db-secret
+  primary:
+    persistence:
+      size: 50Gi
+
+redis:
+  enabled: true
+  auth:
+    enabled: false
+
+minio:
+  enabled: true
+  persistence:
+    size: 100Gi
+
+backend:
+  env:
+    ENVIRONMENT: production
+    OPENAI_API_KEY:
+      valueFrom:
+        secretKeyRef:
+          name: nexusreport-secrets
+          key: openai-api-key
+    SECRET_KEY:
+      valueFrom:
+        secretKeyRef:
+          name: nexusreport-secrets
+          key: secret-key
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+resources:
+  backend:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  frontend:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
